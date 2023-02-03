@@ -989,6 +989,8 @@ static int port_management_fill_response(struct port *target,
 		pds->portIdentity            = target->portIdentity;
 		if (target->state == PS_GRAND_MASTER) {
 			pds->portState = PS_MASTER;
+		} else if (target->state == PS_PASSIVE_SLAVE) {
+			pds->portState = PS_PASSIVE;
 		} else {
 			pds->portState = target->state;
 		}
@@ -1053,10 +1055,13 @@ static int port_management_fill_response(struct port *target,
 	case MID_PORT_PROPERTIES_NP:
 		ppn = (struct port_properties_np *)tlv->data;
 		ppn->portIdentity = target->portIdentity;
-		if (target->state == PS_GRAND_MASTER)
+		if (target->state == PS_GRAND_MASTER) {
 			ppn->port_state = PS_MASTER;
-		else
+		} else if (target->state == PS_PASSIVE_SLAVE) {
+			ppn->port_state = PS_PASSIVE;
+		} else {
 			ppn->port_state = target->state;
+		}
 		ppn->timestamping = target->timestamping;
 		ts_label = interface_label(target->iface);
 		ptp_text_set(&ppn->interface, ts_label);
@@ -1365,6 +1370,7 @@ static void port_synchronize(struct port *p,
 	switch (p->state) {
 	case PS_UNCALIBRATED:
 	case PS_SLAVE:
+	case PS_PASSIVE_SLAVE:
 		monitor_sync(p->slave_event_monitor,
 			     clock_parent_identity(p->clock), seqid,
 			     t1, tmv_add(c1, c2), t2);
@@ -1821,6 +1827,7 @@ int port_is_enabled(struct port *p)
 	case PS_PASSIVE:
 	case PS_UNCALIBRATED:
 	case PS_SLAVE:
+	case PS_PASSIVE_SLAVE:
 		break;
 	}
 	return 1;
@@ -2094,6 +2101,7 @@ int process_announce(struct port *p, struct ptp_message *m)
 	case PS_PASSIVE:
 	case PS_UNCALIBRATED:
 	case PS_SLAVE:
+	case PS_PASSIVE_SLAVE:
 		result = update_current_master(p, m);
 		break;
 	}
@@ -2234,6 +2242,7 @@ void process_follow_up(struct port *p, struct ptp_message *m)
 		return;
 	case PS_UNCALIBRATED:
 	case PS_SLAVE:
+	case PS_PASSIVE_SLAVE:
 		break;
 	}
 
@@ -2455,7 +2464,8 @@ calc:
 
 	p->peerMeanPathDelay = tmv_to_TimeInterval(p->peer_delay);
 
-	if (p->state == PS_UNCALIBRATED || p->state == PS_SLAVE) {
+	if (p->state == PS_UNCALIBRATED || p->state == PS_SLAVE ||
+	    p->state == PS_PASSIVE_SLAVE) {
 		clock_peer_delay(p->clock, p->peer_delay, t1, t2,
 				 p->nrate.ratio);
 	}
@@ -2538,6 +2548,7 @@ void process_sync(struct port *p, struct ptp_message *m)
 		return;
 	case PS_UNCALIBRATED:
 	case PS_SLAVE:
+	case PS_PASSIVE_SLAVE:
 		break;
 	}
 
@@ -2678,6 +2689,9 @@ static void port_e2e_transition(struct port *p, enum port_state next)
 		port_set_announce_tmo(p);
 		port_set_delay_tmo(p);
 		break;
+	case PS_PASSIVE_SLAVE:
+		port_set_announce_tmo(p);
+		break;
 	};
 }
 
@@ -2720,6 +2734,7 @@ static void port_p2p_transition(struct port *p, enum port_state next)
 		flush_peer_delay(p);
 		/* fall through */
 	case PS_SLAVE:
+	case PS_PASSIVE_SLAVE:
 		port_set_announce_tmo(p);
 		break;
 	};
@@ -3408,6 +3423,10 @@ struct port *port_open(const char *phc_device,
 		config_get_int(cfg, p->name, "power_profile.2017.totalTimeInaccuracy");
 	p->slave_event_monitor = clock_slave_monitor(clock);
 
+	p->paired_interface = config_get_string(cfg, p->name, "paired_interface");
+	p->prpPairedPort = UINT16_MAX;
+	p->paired_port = NULL;
+
 	if (!port_is_uds(p) && unicast_client_initialize(p)) {
 		goto err_transport;
 	}
@@ -3549,4 +3568,23 @@ void port_update_unicast_state(struct port *p)
 		unicast_client_state_changed(p);
 		p->unicast_state_dirty = false;
 	}
+}
+
+void port_pair(struct port *p, struct port *o)
+{
+	if ((strncmp(p->paired_interface, interface_name(o->iface),
+			MAX_IFNAME_SIZE) == 0) &&
+			(strncmp(o->paired_interface, interface_name(p->iface),
+			MAX_IFNAME_SIZE) == 0)) {
+		p->paired_port = o;
+		p->prpPairedPort = portnum(o);
+		o->paired_port = p;
+		o->prpPairedPort = portnum(p);
+		pr_info("Created redundancy pair from ports %s and %s", p->name, o->name);
+	}
+}
+
+struct port *port_paired_port(struct port *p)
+{
+	return p->paired_port;
 }
