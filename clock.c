@@ -1009,6 +1009,7 @@ static int clock_add_port(struct clock *c, const char *phc_device,
 		return -1;
 	}
 	LIST_FOREACH(piter, &c->ports, list) {
+		port_pair(piter, p);
 		lastp = piter;
 	}
 	if (lastp) {
@@ -2241,6 +2242,9 @@ static void handle_state_decision_event(struct clock *c)
 		case PS_SLAVE:
 			clock_update_slave(c);
 			event = EV_RS_SLAVE;
+			break;
+		case PS_PASSIVE_SLAVE:
+			event = EV_RS_PSLAVE;
 			break;
 		default:
 			event = EV_FAULT_DETECTED;

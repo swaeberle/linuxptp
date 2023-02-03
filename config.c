@@ -298,6 +298,7 @@ struct config_item config_tab[] = {
 	GLOB_ITEM_INT("offsetScaledLogVariance", 0xffff, 0, UINT16_MAX),
 	PORT_ITEM_INT("operLogPdelayReqInterval", 0, INT8_MIN, INT8_MAX),
 	PORT_ITEM_INT("operLogSyncInterval", 0, INT8_MIN, INT8_MAX),
+	PORT_ITEM_STR("paired_interface", ""),
 	PORT_ITEM_INT("path_trace_enabled", 0, 0, 1),
 	PORT_ITEM_INT("phc_index", -1, -1, INT_MAX),
 	GLOB_ITEM_DBL("pi_integral_const", 0.0, 0.0, DBL_MAX),

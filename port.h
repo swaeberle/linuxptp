@@ -364,4 +364,21 @@ void tc_cleanup(void);
  */
 void port_update_unicast_state(struct port *p);
 
+/**
+ * Pair redundant ports according to IEC 62439-3 standard.
+ *
+ * @param port  A port instance.
+ * @param port  Another port instance.
+ */
+void port_pair(struct port *p, struct port *o);
+
+/**
+ * Get the associated paired port according to IEC 62439-3 standard.
+ *
+ * @param port  A port instance.
+ * @return      Pointer to the paired port instance,
+ *              or NULL if not a doubly attached clock.
+ */
+struct port *port_paired_port(struct port *p);
+
 #endif
