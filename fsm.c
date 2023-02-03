@@ -80,6 +80,9 @@ enum port_state ptp_fsm(enum port_state state, enum fsm_event event, int mdiff)
 		case EV_RS_PASSIVE:
 			next = PS_PASSIVE;
 			break;
+		case EV_RS_PSLAVE:
+			next = PS_PASSIVE_SLAVE;
+			break;
 		default:
 			break;
 		}
@@ -102,6 +105,9 @@ enum port_state ptp_fsm(enum port_state state, enum fsm_event event, int mdiff)
 		case EV_RS_PASSIVE:
 			next = PS_PASSIVE;
 			break;
+		case EV_RS_PSLAVE:
+			next = PS_PASSIVE_SLAVE;
+			break;
 		default:
 			break;
 		}
@@ -121,6 +127,9 @@ enum port_state ptp_fsm(enum port_state state, enum fsm_event event, int mdiff)
 			break;
 		case EV_RS_PASSIVE:
 			next = PS_PASSIVE;
+			break;
+		case EV_RS_PSLAVE:
+			next = PS_PASSIVE_SLAVE;
 			break;
 		default:
 			break;
@@ -210,6 +219,40 @@ enum port_state ptp_fsm(enum port_state state, enum fsm_event event, int mdiff)
 		case EV_RS_PASSIVE:
 			next = PS_PASSIVE;
 			break;
+		case EV_RS_PSLAVE:
+			next = PS_PASSIVE_SLAVE;
+			break;
+		default:
+			break;
+		}
+		break;
+
+	case PS_PASSIVE_SLAVE:
+		switch (event) {
+		case EV_DESIGNATED_DISABLED:
+			next = PS_DISABLED;
+			break;
+		case EV_FAULT_DETECTED:
+			next = PS_FAULTY;
+			break;
+		case EV_ANNOUNCE_RECEIPT_TIMEOUT_EXPIRES:
+			next = PS_MASTER;
+			break;
+		case EV_SYNCHRONIZATION_FAULT:
+			next = PS_LISTENING;
+			break;
+		case EV_RS_MASTER:
+			next = PS_PRE_MASTER;
+			break;
+		case EV_RS_GRAND_MASTER:
+			next = PS_GRAND_MASTER;
+			break;
+		case EV_RS_PASSIVE:
+			next = PS_PASSIVE;
+			break;
+		case EV_RS_SLAVE:
+			next = PS_SLAVE;
+			break;
 		default:
 			break;
 		}
@@ -276,6 +319,9 @@ enum port_state ptp_slave_fsm(enum port_state state, enum fsm_event event,
 		case EV_RS_SLAVE:
 			next = PS_UNCALIBRATED;
 			break;
+		case EV_RS_PSLAVE:
+			next = PS_PASSIVE_SLAVE;
+			break;
 		default:
 			break;
 		}
@@ -323,6 +369,31 @@ enum port_state ptp_slave_fsm(enum port_state state, enum fsm_event event,
 		case EV_RS_SLAVE:
 			if (mdiff)
 				next = PS_UNCALIBRATED;
+			break;
+		case EV_RS_PSLAVE:
+			next = PS_PASSIVE_SLAVE;
+			break;
+		default:
+			break;
+		}
+		break;
+
+	case PS_PASSIVE_SLAVE:
+		switch (event) {
+		case EV_DESIGNATED_DISABLED:
+			next = PS_DISABLED;
+			break;
+		case EV_FAULT_DETECTED:
+			next = PS_FAULTY;
+			break;
+		case EV_ANNOUNCE_RECEIPT_TIMEOUT_EXPIRES:
+		case EV_RS_MASTER:
+		case EV_RS_GRAND_MASTER:
+		case EV_RS_PASSIVE:
+			next = PS_LISTENING;
+			break;
+		case EV_RS_SLAVE:
+			next = PS_SLAVE;
 			break;
 		default:
 			break;

@@ -130,12 +130,14 @@ enum port_state bmc_state_decision(struct clock *c, struct port *r,
 				   int (*compare)(struct dataset *a, struct dataset *b))
 {
 	struct dataset *clock_ds, *clock_best, *port_best;
+	struct port *paired_port;
 	enum port_state ps;
 
 	clock_ds = clock_default_ds(c);
 	clock_best = clock_best_foreign(c);
 	port_best = port_best_foreign(r);
 	ps = port_state(r);
+	paired_port = port_paired_port(r);
 
 	/*
 	 * This scenario is particularly important in the designated_slave_fsm
@@ -165,6 +167,14 @@ enum port_state bmc_state_decision(struct clock *c, struct port *r,
 
 	if (clock_best_port(c) == r) {
 		return PS_SLAVE; /*S1*/
+	}
+
+	/*
+	 * This scenario handles the PASSIVE_SLAVE transition according to
+	 * IEC 62439-3 standard in case of a doubly attached clock.
+	 */
+	if (paired_port && (clock_best_port(c) == paired_port)) {
+		return PS_PASSIVE_SLAVE;
 	}
 
 	if (compare(clock_best, port_best) == A_BETTER_TOPO) {

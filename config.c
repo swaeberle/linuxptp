@@ -326,6 +326,7 @@ struct config_item config_tab[] = {
 	PORT_ITEM_STR("p2p_dst_ipv4", "224.0.0.107"),
 	PORT_ITEM_STR("p2p_dst_ipv6", "FF02:0:0:0:0:0:0:6B"),
 	PORT_ITEM_STR("p2p_dst_mac", "01:80:C2:00:00:0E"),
+	PORT_ITEM_STR("paired_interface", ""),
 	PORT_ITEM_INT("path_trace_enabled", 0, 0, 1),
 	PORT_ITEM_INT("phc_index", -1, -1, INT_MAX),
 	GLOB_ITEM_DBL("pi_integral_const", 0.0, 0.0, DBL_MAX),

@@ -31,6 +31,7 @@ enum port_state {
 	PS_PASSIVE,
 	PS_UNCALIBRATED,
 	PS_SLAVE,
+	PS_PASSIVE_SLAVE, /*according to IEC 62439-3 doubly attached clocks*/
 	PS_GRAND_MASTER, /*non-standard extension*/
 };
 
@@ -53,6 +54,7 @@ enum fsm_event {
 	EV_RS_GRAND_MASTER,
 	EV_RS_SLAVE,
 	EV_RS_PASSIVE,
+	EV_RS_PSLAVE, /*according to IEC 62439-3 doubly attached clocks*/
 };
 
 enum bmca_select {

@@ -45,9 +45,10 @@ const char *ps_str[] = {
 	"LISTENING",
 	"PRE_MASTER",
 	"MASTER",
-	"PASSIVE",
+	"PASSIVE",      /*PASSIVE_MASTER*/
 	"UNCALIBRATED",
 	"SLAVE",
+	"PASSIVE",      /*PASSIVE_SLAVE*/
 	"GRAND_MASTER",
 };
 
@@ -69,6 +70,7 @@ const char *ev_str[] = {
 	"RS_GRAND_MASTER",
 	"RS_SLAVE",
 	"RS_PASSIVE",
+	"RS_PSLAVE",
 };
 
 const char *ts_str(enum timestamp_type ts)

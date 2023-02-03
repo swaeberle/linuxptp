@@ -88,6 +88,7 @@ static int tc_blocked(struct port *q, struct port *p, struct ptp_message *m)
 		break;
 	case PS_UNCALIBRATED:
 	case PS_SLAVE:
+	case PS_PASSIVE_SLAVE:
 		break;
 	}
 	/* Egress state */
@@ -102,6 +103,7 @@ static int tc_blocked(struct port *q, struct port *p, struct ptp_message *m)
 		return 1;
 	case PS_UNCALIBRATED:
 	case PS_SLAVE:
+	case PS_PASSIVE_SLAVE:
 		/* Delay_Req swims against the stream. */
 		if (msg_type(m) != DELAY_REQ) {
 			return 1;
