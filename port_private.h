@@ -150,6 +150,10 @@ struct port {
 	Integer64	    portAsymmetry;
 	struct PortStats    stats;
 	struct PortServiceStats    service_stats;
+	/* IEC 62439-3 portDS additions */
+	char               *paired_interface;
+	UInteger16          prpPairedPort;
+	struct port        *paired_port;
 	/* foreignMasterDS */
 	LIST_HEAD(fm, foreign_clock) foreign_masters;
 	/* TC book keeping */

@@ -205,7 +205,7 @@ void port_notify_event(struct port *p, enum notification event);
  * @param phc_device    The name of PHC device as found on the command line.
  * @param phc_index     The PHC device index for the network device.
  * @param timestamping  The timestamping mode for this port.
- * @param number	An arbitrary number assigned to this port.
+ * @param number        An arbitrary number assigned to this port.
  * @param interface     The interface data
  * @param clock         A pointer to the system PTP clock.
  * @return A pointer to an open port on success, or NULL otherwise.
@@ -229,8 +229,8 @@ enum port_state port_state(struct port *port);
 
 /**
  * Return  port's delay mechanism method.
- * @param port	A port instance.
- * @return 	one of the @ref delay_mechanism values.
+ * @param port  A port instance.
+ * @return      one of the @ref delay_mechanism values.
  */
 enum delay_mechanism port_delay_mechanism(struct port *port);
 
@@ -246,16 +246,16 @@ int port_state_update(struct port *p, enum fsm_event event, int mdiff);
 /**
  * Return array of file descriptors for this port. The fault fd is not
  * included.
- * @param port	A port instance
- * @return	Array of file descriptors. Unused descriptors are guranteed
- *		to be set to -1.
+ * @param port  A port instance
+ * @return      Array of file descriptors. Unused descriptors are guranteed
+ *              to be set to -1.
  */
 struct fdarray *port_fda(struct port *port);
 
 /**
  * Return file descriptor of the port.
- * @param port	A port instance.
- * @return	File descriptor or -1 if not applicable.
+ * @param port  A port instance.
+ * @return      File descriptor or -1 if not applicable.
  */
 int port_fault_fd(struct port *port);
 
@@ -307,10 +307,10 @@ int set_tmo_lin(int fd, int seconds);
  * Sets port's fault file descriptor timer.
  * Passing both 'scale' and 'log_seconds' as zero disables the timer.
  *
- * @param fd		A port instance.
- * @param scale		The multiplicative factor for the timer.
- * @param log_seconds	The exponential factor for the timer.
- * @return		Zero on success, non-zero otherwise.
+ * @param fd            A port instance.
+ * @param scale         The multiplicative factor for the timer.
+ * @param log_seconds   The exponential factor for the timer.
+ * @return              Zero on success, non-zero otherwise.
  */
 int port_set_fault_timer_log(struct port *port,
 			     unsigned int scale, int log_seconds);
@@ -319,9 +319,9 @@ int port_set_fault_timer_log(struct port *port,
  * Sets port's fault file descriptor timer.
  * Passing 'seconds' as zero disables the timer.
  *
- * @param fd		A port instance.
- * @param seconds	The timeout value for the timer.
- * @return		Zero on success, non-zero otherwise.
+ * @param fd            A port instance.
+ * @param seconds       The timeout value for the timer.
+ * @return              Zero on success, non-zero otherwise.
  */
 int port_set_fault_timer_lin(struct port *port, int seconds);
 
@@ -363,5 +363,22 @@ void tc_cleanup(void);
  * @param port  A port instance.
  */
 void port_update_unicast_state(struct port *p);
+
+/**
+ * Pair redundant ports according to IEC 62439-3 standard.
+ *
+ * @param port  A port instance.
+ * @param port  Another port instance.
+ */
+void port_pair(struct port *p, struct port *o);
+
+/**
+ * Get the associated paired port according to IEC 62439-3 standard.
+ *
+ * @param port  A port instance.
+ * @return      Pointer to the paired port instance,
+ *              or NULL if not a doubly attached clock.
+ */
+struct port *port_paired_port(struct port *p);
 
 #endif
