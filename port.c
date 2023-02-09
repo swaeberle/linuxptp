@@ -3516,6 +3516,7 @@ enum delay_mechanism port_delay_mechanism(struct port *port)
 int port_state_update(struct port *p, enum fsm_event event, int mdiff)
 {
 	enum port_state next = p->state_machine(p->state, event, mdiff);
+	struct port *o = port_paired_port(p);
 
 	if (PS_FAULTY == next) {
 		struct fault_interval i;
@@ -3541,6 +3542,29 @@ int port_state_update(struct port *p, enum fsm_event event, int mdiff)
 			event = EV_INIT_COMPLETE;
 		}
 		next = p->state_machine(next, event, 0);
+	}
+
+	if (o && !mdiff)
+	{
+		/*
+		 * This is a special case for doubly attached clocks, where
+		 * the current SLAVE port temporarily enters the FAULTY state.
+		 * This forces the redundant port being selected as SLAVE
+		 * port instead.
+		 */
+		if ((PS_PASSIVE_SLAVE == next) && (PS_FAULTY == o->state)) {
+			next = PS_SLAVE;
+		}
+
+		/*
+		 * This is a special case for doubly attached clocks, where
+		 * the best clock recovers from FAULTY state and takes over
+		 * the SLAVE role from the redundant port without the need
+		 * to go through UNCALIBRATED state.
+		 */
+		if ((PS_UNCALIBRATED == next) && PS_SLAVE == o->state) {
+			next = PS_SLAVE;
+		}
 	}
 
 	if (mdiff) {
