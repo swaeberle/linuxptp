@@ -875,6 +875,8 @@ static const Octet profile_id_drr[] = {0x00, 0x1B, 0x19, 0x00, 0x01, 0x00};
 static const Octet profile_id_p2p[] = {0x00, 0x1B, 0x19, 0x00, 0x02, 0x00};
 static const Octet profile_id_8275_1[] = {0x00, 0x19, 0xA7, 0x01, 0x02, 0x03};
 static const Octet profile_id_8275_2[] = {0x00, 0x19, 0xA7, 0x02, 0x01, 0x02};
+static const Octet profile_id_62439_3_SAC[] = {0x00, 0x0C, 0xCD, 0x00, 0x01, 0x00};
+static const Octet profile_id_62439_3_DAC[] = {0x00, 0x0C, 0xCD, 0x00, 0x01, 0x30};
 
 static int port_management_fill_response(struct port *target,
 					 struct ptp_message *rsp, int id)
@@ -895,8 +897,10 @@ static int port_management_fill_response(struct port *target,
 	struct port_ds_np *pdsnp;
 	struct tlv_extra *extra;
 	struct PortIdentity pid;
+	const Octet *profile_id;
 	const char *ts_label;
 	struct portDS *pds;
+	struct config *cfg;
 	uint16_t u16;
 	uint8_t *buf;
 	int datalen;
@@ -969,20 +973,31 @@ static int port_management_fill_response(struct port *target,
 		buf += sizeof(struct PTPText) + cd->userDescription->length;
 
 		if (target->delayMechanism == DM_P2P) {
-			memcpy(buf, profile_id_p2p, PROFILE_ID_LEN);
+			cfg = clock_config(target->clock);
+			if (config_get_int(cfg, NULL, "dataset_comparison") ==
+			    DS_CMP_IEC62439_3) {
+				if (target->paired_port) {
+					profile_id = profile_id_62439_3_DAC;
+				} else {
+					profile_id = profile_id_62439_3_SAC;
+				}
+			} else {
+				profile_id = profile_id_p2p;
+			}
 		} else {
-			struct config *cfg = clock_config(target->clock);
+			cfg = clock_config(target->clock);
 			if (config_get_int(cfg, NULL, "dataset_comparison") ==
 			    DS_CMP_G8275) {
 				if (transport_type(target->trp) == TRANS_IEEE_802_3) {
-					memcpy(buf, profile_id_8275_1, PROFILE_ID_LEN);
+					profile_id = profile_id_8275_1;
 				} else {
-					memcpy(buf, profile_id_8275_2, PROFILE_ID_LEN);
+					profile_id = profile_id_8275_2;
 				}
 			} else {
-				memcpy(buf, profile_id_drr, PROFILE_ID_LEN);
+				profile_id = profile_id_drr;
 			}
 		}
+		memcpy(buf, profile_id, PROFILE_ID_LEN);
 		buf += PROFILE_ID_LEN;
 		datalen = buf - tlv->data;
 		break;

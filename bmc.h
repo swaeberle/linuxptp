@@ -32,6 +32,7 @@
 enum {
 	DS_CMP_IEEE1588,
 	DS_CMP_G8275,
+	DS_CMP_IEC62439_3,
 };
 
 /**
