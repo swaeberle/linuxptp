@@ -160,6 +160,7 @@ static struct config_enum clock_type_enu[] = {
 static struct config_enum dataset_comp_enu[] = {
 	{ "ieee1588", DS_CMP_IEEE1588 },
 	{ "G.8275.x", DS_CMP_G8275    },
+	{ "iec62439-3", DS_CMP_IEC62439_3 },
 	{ NULL, 0 },
 };
 
