@@ -873,6 +873,8 @@ static const Octet profile_id_drr[] = {0x00, 0x1B, 0x19, 0x00, 0x01, 0x00};
 static const Octet profile_id_p2p[] = {0x00, 0x1B, 0x19, 0x00, 0x02, 0x00};
 static const Octet profile_id_8275_1[] = {0x00, 0x19, 0xA7, 0x01, 0x02, 0x03};
 static const Octet profile_id_8275_2[] = {0x00, 0x19, 0xA7, 0x02, 0x01, 0x02};
+static const Octet profile_id_62439_3_SAC[] = {0x00, 0x0C, 0xCD, 0x00, 0x01, 0x00};
+static const Octet profile_id_62439_3_DAC[] = {0x00, 0x0C, 0xCD, 0x00, 0x01, 0x30};
 
 static int port_management_fill_response(struct port *target,
 					 struct ptp_message *rsp, int id)
@@ -967,7 +969,17 @@ static int port_management_fill_response(struct port *target,
 		buf += sizeof(struct PTPText) + cd->userDescription->length;
 
 		if (target->delayMechanism == DM_P2P) {
-			memcpy(buf, profile_id_p2p, PROFILE_ID_LEN);
+			struct config *cfg = clock_config(target->clock);
+			if (config_get_int(cfg, NULL, "dataset_comparison") ==
+			    DS_CMP_IEC62439_3) {
+				if (target->paired_port) {
+					memcpy(buf, profile_id_62439_3_DAC, PROFILE_ID_LEN);
+				} else {
+					memcpy(buf, profile_id_62439_3_SAC, PROFILE_ID_LEN);
+				}
+			} else {
+				memcpy(buf, profile_id_p2p, PROFILE_ID_LEN);
+			}
 		} else {
 			struct config *cfg = clock_config(target->clock);
 			if (config_get_int(cfg, NULL, "dataset_comparison") ==
