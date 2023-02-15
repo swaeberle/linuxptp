@@ -23,6 +23,7 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "bmc.h"
 #include "clock.h"
 #include "config.h"
 #include "ntpshm.h"
@@ -73,6 +74,7 @@ int main(int argc, char *argv[])
 	char *config = NULL, *req_phc = NULL, *progname;
 	enum clock_type type = CLOCK_TYPE_ORDINARY;
 	int c, err = -1, index, print_level;
+	bool iec_dac = false;
 	struct clock *clock = NULL;
 	struct option *opts;
 	struct config *cfg;
@@ -206,10 +208,18 @@ int main(int argc, char *argv[])
 		goto out;
 	}
 
+	if (config_get_int(cfg, NULL, "dataset_comparison") == DS_CMP_IEC62439_3) {
+		iec_dac = true;
+	}
+
 	type = config_get_int(cfg, NULL, "clock_type");
 	switch (type) {
 	case CLOCK_TYPE_ORDINARY:
-		if (cfg->n_interfaces > 1) {
+		if ((!iec_dac && cfg->n_interfaces > 1) ||
+		    /* The IEC 62439-3 standard allows doubly attached ordinary
+		     * clocks
+		     */
+		    (iec_dac && cfg->n_interfaces > 2)) {
 			type = CLOCK_TYPE_BOUNDARY;
 		}
 		break;
