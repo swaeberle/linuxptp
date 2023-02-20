@@ -32,7 +32,14 @@
 
 /* Version definition for IEEE 1588-2019 */
 #define PTP_MAJOR_VERSION	2
-#define PTP_MINOR_VERSION	1
+#ifndef PTP_MINOR_VERSION
+	/*
+         * Allow overriding the PTPv2 minor version during compile. This
+         * improves the compatibility with devices, not able to handle minor
+         * versions at all (and expecting upper nibble always as 0).
+	 */
+	#define PTP_MINOR_VERSION	1
+#endif
 #define PTP_VERSION		(PTP_MINOR_VERSION << 4 | PTP_MAJOR_VERSION)
 
 #define MAJOR_VERSION_MASK	0x0f
