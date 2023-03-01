@@ -561,8 +561,8 @@ The default is "OC".
 .TP
 .B dataset_comparison
 Specifies the method to be used when comparing data sets during the
-Best Master Clock Algorithm.  The possible values are "ieee1588" and
-"G.8275.x".  The default is "ieee1588".
+Best Master Clock Algorithm.  The possible values are "ieee1588",
+"G.8275.x" and "iec62439-3".  The default is "ieee1588".
 
 .TP
 .B domainNumber
@@ -731,6 +731,12 @@ The default is 0.
 The offsetScaledLogVariance attribute of the local clock. It characterizes the
 stability of the clock.
 The default is 0xFFFF.
+
+.TP
+.B paired_port
+The paired port in a redundancy setup according to IEC 62439-3 standard.
+Both interfaces need to configure the respective other port as paired port.
+The default is an empty string (no redundancy).
 
 .TP
 .B pi_integral_const
