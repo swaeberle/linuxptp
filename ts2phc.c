@@ -149,8 +149,8 @@ void ts2phc_clock_add_tstamp(struct ts2phc_clock *clock, tmv_t t)
 {
 	struct timespec ts = tmv_to_timespec(t);
 
-	pr_debug("adding tstamp %ld.%09ld to clock %s",
-		 ts.tv_sec, ts.tv_nsec, clock->name);
+	pr_debug("adding tstamp %jd.%09ld to clock %s",
+		 (intmax_t)ts.tv_sec, ts.tv_nsec, clock->name);
 	clock->last_ts = t;
 	clock->is_ts_available = true;
 }

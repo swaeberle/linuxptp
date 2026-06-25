@@ -127,13 +127,13 @@ static int get_unambiguous_time(struct tzinfo *tz)
 
 static void show_timezone_info(const char *label, struct tzinfo *tz)
 {
-	pr_debug("%s %s ts %ld local-utc %ld tai-utc %d local-tai %ld %s",
+	pr_debug("%s %s ts %jd local-utc %jd tai-utc %d local-tai %jd %s",
 		 label,
 		 tz->name,
-		 tz->timestamp,
-		 tz->local_utc_offset,
+		 (intmax_t)tz->timestamp,
+		 (intmax_t)tz->local_utc_offset,
 		 tz->tai_utc_offset,
-		 tz->local_tai_offset,
+		 (intmax_t)tz->local_tai_offset,
 		 tz->tai_result == LSTAB_OK ? "valid" : "invalid");
 }
 
